@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>
+            OCR
+        </title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" 
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+         crossorigin="anonymous">
+         <style>
+                #my_camera{
+                 width: 200px;
+                 height: 160px;
+                 border: 1px solid black;
+                 margin-left:25%;
+                 
+                }
+                </style>
+                
+                
+                <!-- Webcam.min.js -->
+                <script type="text/javascript" src="webcamjs/webcam.min.js"></script>
+                
+                <!-- Configure a few settings and attach camera -->
+                <script language="JavaScript">
+
+
+               
+                 Webcam.set({
+                  width: 200,
+                  height: 160,
+                  image_format: 'jpeg',
+                  jpeg_quality: 90
+                 });
+                 Webcam.attach( '#my_camera' );
+                
+                <!-- Code to handle taking the snapshot and displaying it locally -->
+                function take_snapshot() {
+                 
+                 // take snapshot and get image data
+                 Webcam.snap( function(data_uri) {
+                  // display results in page
+                  document.getElementById('results').innerHTML = 
+                  '<img src=" style="display:inline"'+data_uri+'"/>';
+                  } );
+                }
+
+
+
+
+            function encodeImageFileAsURL(element) {
+              var file = element.files[0];
+              var reader = new FileReader();
+              reader.onloadend = function() {
+                console.log('RESULT', reader.result)
+              }
+              reader.readAsDataURL(file);
+            }
+                </script>
+    </head>
+    <body>
+        <div>
+            <header class="bg-secondary" style="padding: 3em;">
+                <h1 class="text-center text-warning" id="h11">Optical Character Recognition(OCR)</h1>
+            </header><br/><br/><br/>
+            <div>
+                <div  class="text-center">
+                    <form class="form-group" action="https://api.ocr.space/parse/image"  >
+             <input type="text" name="apikey" value="a919c987ea88957" hidden>
+                        <input type="file" name="base64image" id="imag" >
+                        <button  type ="button" class="btn btn-primary mb-2" onclick="upload1()">Submit</button>
+                        <br/><br/><br/>                 
+                    </form>
+                </div>
+
+                <div id="final" class="text-center jumbotron display-3">
+                  <div class="spinner-border text-primary hidden" id="spin"></div>
+                </div>
+                    <h3 class="text-center">OR</h3>
+                    <div id="my_camera" style="display: inline-block"></div>
+                    <div id="results" style="display: inline-block;margin-left: 20%;"></div>
+                    <div class="mt-3">
+                        
+                            <button style="margin-left: 23.5%" class="btn btn-primary mb-2" value="Open Camera" onClick="configure()">Open Camera</button>
+                            <button class="btn btn-primary mb-2" value="Take Snapshote" onClick="take_snapshot()">Take Picture</button>
+                            
+                            <button  style=" margin-left: 20%;" class="btn btn-primary mb-2" value="Upload Snapshot" onClick="saveSnap()">Upload Picture</button>   
+                                  
+                    </div>
+
+                    
+                    <script type="text/javascript" src="webcamjs/webcam.min.js"></script>
+
+	<!-- Code to handle taking the snapshot and displaying it locally -->
+                    <script language="JavaScript">
+                     
+                         
+                        // Configure a few settings and attach camera
+                        function configure(){
+                            Webcam.set({
+                                width: 200,
+                                height: 160,
+                                image_format: 'jpeg',
+                                jpeg_quality: 90
+                            });
+                            Webcam.attach( '#my_camera' );
+                        }
+                        // A button for taking snaps
+                        
+
+                        // preload shutter audio clip
+                        var shutter = new Audio();
+                        shutter.autoplay = false;
+                        shutter.src = navigator.userAgent.match(/Firefox/) ? 'shutter.ogg' : 'shutter.mp3';
+
+                        function take_snapshot() {
+                            // play sound effect
+                            shutter.play();
+
+                            // take snapshot and get image data
+                            Webcam.snap( function(data_uri) {
+                                // display results in page
+                                
+                                document.getElementById('results').innerHTML = 
+                                    '<img id="imageprev" src="'+data_uri+'"/>';
+                            } );
+                              
+                            Webcam.reset();
+                        }
+
+                        function saveSnap(){
+                          
+                            var base64image =  document.getElementById("imageprev").src;
+                         console.log(base64image);
+                           $.ajax({url: "https://api.ocr.space/parse/image",
+                        beforeSend: function(){
+                          
+                        },
+                        type: "Post", data:{apikey : "a919c987ea88957", base64Image: base64image} ,success: function(result){
+                          $("#final").html("output: "+result["ParsedResults"][0]["ParsedText"]);
+                          console.log(result["ParsedResults"][0]["ParsedText"])
+                        }, error: function(error){
+                           $("#final").html("error");
+                           console.log(error);
+                        }
+                      });                 
+                           
+                         
+                        }
+
+
+                        
+                      
+                    </script>
+                    
+
+            </div>
+        </div>
+        </div>
+       <script
+  src="https://code.jquery.com/jquery-3.4.1.min.js"
+  integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+  crossorigin="anonymous"></script>
+            <script type="text/javascript">
+              var base64;
+               document.getElementById("imag").addEventListener("change", readFile);
+               function upload1(){
+                      $.ajax({url: "https://api.ocr.space/parse/image",
+                        beforeSend: function(){
+                          
+                        },
+                        type: "Post", data:{apikey : "a919c987ea88957", base64Image: base64} ,success: function(result){
+                          $("#final").html("output: "+result["ParsedResults"][0]["ParsedText"]);
+                          console.log(result["ParsedResults"][0]["ParsedText"])
+                        }, error: function(error){
+                           $("#final").html("error");
+                           console.log(error);
+                        }
+                      });
+                    }
+
+
+                    function readFile() {
+  
+  if (this.files && this.files[0]) {
+    
+    var FR= new FileReader();
+    
+    FR.addEventListener("load", function(e) {
+        base64      = e.target.result;
+     
+    }); 
+    
+    FR.readAsDataURL( this.files[0] );
+  }
+  
+}
+
+   
+
+            </script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+            <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+     
+    </body>
+</html>
